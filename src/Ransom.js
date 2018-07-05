@@ -6,7 +6,7 @@
 
   
 
-  class Words extends Component {
+  class Ransom extends Component {
 
   	render(props)
   	{
@@ -15,5 +15,4 @@
   			);
   	}
   }
-  export default DragDropContext(MultiBackend(HTML5toTouch))(Words);
-
+  export default DragDropContext(MultiBackend(HTML5toTouch))(Ransom);
