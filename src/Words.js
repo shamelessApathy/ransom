@@ -1,12 +1,10 @@
   import { Component } from 'react';
-  import { DragDropContext } from 'react-dnd';
-  import MultiBackend from 'react-dnd-multi-backend';
-  import HTML5toTouch from 'react-dnd-multi-backend/lib/HTML5toTouch'; // or any other pipeline
+
 
 
   
 
-  class Words extends Component {
+  export default class Words extends Component {
 
   	render(props)
   	{
@@ -15,5 +13,5 @@
   			);
   	}
   }
-  export default DragDropContext(MultiBackend(HTML5toTouch))(Words);
+
 
