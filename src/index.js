@@ -13,6 +13,7 @@ import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
 
 import geek from "./cutout/geek.jpg";
 import baby from "./cutout/baby.jpg";
+import make from "./cutout/make.jpg";
 
 class RansomConsole extends React.Component
 {
@@ -29,10 +30,20 @@ class RansomConsole extends React.Component
 				src: baby,
 				text: "baby",
 				id: "baby"
+			},
+			{
+				src: make,
+				text: "make",
+				id: "make"
 			}],
-			ransom: []
+			ransom: [],
 		}
-		this.isDrag = "";	
+		this.isDrag = "";
+		this.parent="";	
+	}
+	touchStart(ev)
+	{
+		console.log('inside touchStart()');
 	}
 	renderRansom()
 	{
@@ -40,26 +51,26 @@ class RansomConsole extends React.Component
 		let stateRansom = this.state.ransom;
 		for (let i = 0; i < stateRansom.length; i++)
 		{
-			let wordTemplate = <img onDrag={(event) => this.drag(event)} id={stateRansom[i].id} key={i} className="word-img" src={stateRansom[i].src} alt="" data-text={stateRansom[i].text}/>;
+			let wordTemplate = <img onTouchStart={(event) => this.touchStart(event)} onDrag={(event) => this.drag(event)} id={stateRansom[i].id} key={i} className="word-img" src={stateRansom[i].src} alt="" data-text={stateRansom[i].text}/>;
 			ransomArray.push(wordTemplate);
 		}
 		return(
-			<div>
 			<Ransom
 				value={ransomArray}
 			/>
-			</div>
 			);
 	}
 	rebuild()
 	{
 		let current = this.isDrag;
+		let source;
 		let stateWords = this.state.words;
 		let stateRansom = this.state.ransom;
 		for (let i =0; i < stateWords.length; i++)
 		{
 			if (stateWords[i].id === current)
 			{
+				source = stateWords[i].src;
 				stateWords.splice(i,1);
 			}
 		}
@@ -67,11 +78,21 @@ class RansomConsole extends React.Component
 		{
 			if (stateRansom[i].id === current)
 			{
+				source = stateRansom[i].src;
 				stateRansom.splice(i,1);
 			}
 		}
-		stateRansom.push({ src: current, text: '${current}', id: '${current}'});
-		console.log(stateRansom);
+		if (this.parent === "word-box")
+		{
+			stateRansom.push({src: source, text: current, id: current});
+		}
+		if (this.parent === "ransom-box")
+		{
+			console.log('inside ransom-box match');
+			stateWords.push({src: source, text: current, id: current});
+		}
+		console.log("stateRansom:" + stateRansom);
+		console.log("stateWords:" + stateWords);
 		
 		this.setState({
 			words: stateWords,
@@ -79,6 +100,7 @@ class RansomConsole extends React.Component
 		})
 		console.log(stateWords);
 		this.isDrag = "";
+		this.parent = "";
 	}
 	allowDrop(ev)
 	{
@@ -89,6 +111,9 @@ class RansomConsole extends React.Component
 	{
 		console.log('in draG()');
 		let id = ev.target.id;
+		let domRep = document.getElementById(id);
+		let parent = domRep.parentNode.id;
+		this.parent = parent;
 		ev.dataTransfer.setData("text", ev.target.id);
 		this.isDrag = id;
 	}
@@ -96,23 +121,12 @@ class RansomConsole extends React.Component
 	drop(ev)
 	{
 		ev.preventDefault();
-		let data = ev.dataTransfer.getData("text");
-		console.log("data:" + data);
-		if (ev.target.id === "ransom-box")
-		{
-			console.log('its the ransom box');
-			console.log(ev);
-			this.rebuild();
-		}
-		if (ev.target.id === "word-box")
-		{
-			console.log('this is the word box');
-		}
+		this.rebuild();
 	}
 	ondragover(ev)
 	{
 		console.log('container being dragged over!');
-		console.log(ev);
+		console.log(ev.currentTarget);
 	}
 	renderWords()
 	{
@@ -120,7 +134,7 @@ class RansomConsole extends React.Component
 		let stateWords = this.state.words;
 		for (let i = 0; i < stateWords.length; i++)
 		{
-			let wordTemplate = <img onDrag={(event) => this.drag(event)} id={stateWords[i].id} key={i} className="word-img" src={stateWords[i].src} alt="" data-text={stateWords[i].text}/>;
+			let wordTemplate = <img onTouchStart={(event) => this.touchStart(event)} onDrag={(event) => this.drag(event)} id={stateWords[i].id} key={i} className="word-img" src={stateWords[i].src} alt="" data-text={stateWords[i].text}/>;
 			wordsArray.push(wordTemplate);
 		}
 		return(
@@ -138,7 +152,7 @@ class RansomConsole extends React.Component
 					<div className="row">
 						<div className="col-md-6">
 							<h4 className='title'>Words Container</h4>
-							<div className="words-container" id="word-box" onDragOver={(event)=> this.ondragover(event)} onDrop={(event) => this.drop(event)}>{this.renderWords()}</div>
+							<div droppable="true" className="words-container" id="word-box" onDragOver={(event)=> this.allowDrop(event)} onDrop={(event) => this.drop(event)}>{this.renderWords()}</div>
 						</div>
 						<div className="col-md-6">
 							<h4 className='title'>Sentence Area</h4>
